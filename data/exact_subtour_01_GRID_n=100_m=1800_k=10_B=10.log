@@ -1,0 +1,59 @@
+
+Gurobi 10.0.2 (linux64, C++) logging started Tue Jul 11 10:41:19 2023
+
+Set parameter WLSAccessID
+Set parameter WLSSecret
+Set parameter LicenseID to value 2393681
+Academic license - for non-commercial use only - registered to sjelic@grf.bg.ac.rs
+Set parameter LogToConsole to value 0
+Set parameter TimeLimit to value 600
+Set parameter Threads to value 1
+Set parameter LazyConstraints to value 1
+Gurobi Optimizer version 10.0.2 build v10.0.2rc0 (linux64)
+
+CPU model: Intel(R) Core(TM) i5-7300U CPU @ 2.60GHz, instruction set [SSE2|AVX|AVX2]
+Thread count: 2 physical cores, 4 logical processors, using up to 1 threads
+
+Academic license - for non-commercial use only - registered to sjelic@grf.bg.ac.rs
+Optimize a model with 3711 rows, 1910 columns and 12890 nonzeros
+Model fingerprint: 0xcd263698
+Variable types: 0 continuous, 1910 integer (1910 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+00, 1e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R10 by 1701.000000000
+
+Found heuristic solution: objective 93.0000000
+Presolve time: 0.02s
+Presolved: 3711 rows, 1910 columns, 12890 nonzeros
+Variable types: 0 continuous, 1910 integer (1910 binary)
+
+Root relaxation: objective 1.450000e+01, 128 iterations, 0.01 seconds (0.01 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   14.50000    0   16   93.00000   14.50000  84.4%     -    0s
+H    0     0                      40.0000000   14.50000  63.7%     -    0s
+H    0     0                      38.0000000   14.50000  61.8%     -    0s
+*    0     0               0      15.0000000   15.00000  0.00%     -    0s
+
+Cutting planes:
+  Gomory: 1
+  Zero half: 5
+  RLT: 4
+  Lazy constraints: 25
+
+Explored 1 nodes (228 simplex iterations) in 0.11 seconds (0.06 work units)
+Thread count was 1 (of 4 available processors)
+
+Solution count 4: 15 38 40 93 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.500000000000e+01, best bound 1.500000000000e+01, gap 0.0000%
+
+User-callback calls 171, time in user-callback 0.00 sec
