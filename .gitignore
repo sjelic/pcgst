@@ -9,3 +9,7 @@ gurobi.lic
 *.fdb_latexmk
 *.bbl
 *.aux
+*.nav
+*.out
+*.snm
+*.toc
