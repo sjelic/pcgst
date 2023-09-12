@@ -3,3 +3,9 @@ lemon/*
 gurobi.lic
 .vscode
 *.pdf
+*.fls
+*.log
+*.synctex.gz
+*.fdb_latexmk
+*.bbl
+*.aux

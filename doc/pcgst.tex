@@ -2,6 +2,7 @@
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{graphics,graphicx}
+\usepackage{algorithm,algpseudocode}
 
 \newtheorem{example}[section]{Example}
 \title{Node weighted prize-collecting group Steiner tree with bounded group size}
@@ -10,7 +11,7 @@
 \begin{document}
 \maketitle
 
-We are given an undirected graph $G=\left(V,E\right)$, a family $\mathcal{G}=\{G_1,\ldots,G_k\}$, of subsets $G_i\subseteq V$, $i\in\left[k\right]$ such that $\left|G_i\right|\le\gamma$ for all $i\in\left[k\right]$, node weight function $w_V:V\rightarrow\mathbb{R}^+$, edge weight function $w_E:E\rightarrow\mathbb{R}^+$ and penalty function $\pi:\mathcal{G}\rightarrow\mathbb{R}^+$. The objective is to find a subtree of $G$ where
+We are given an undirected graph $G=\left(V,E\right)$, a family $\mathcal{G}=\{G_1,\ldots,$$G_k\}$, of subsets $G_i\subseteq V$, $i\in\left[k\right]$ such that $\left|G_i\right|\le\gamma$ for all $i\in\left[k\right]$, node weight function $w_V:V\rightarrow\mathbb{R}^+$, edge weight function $w_E:E\rightarrow\mathbb{R}^+$ and pe\-nal\-ty function $\pi:\mathcal{G}\rightarrow\mathbb{R}^+$. The objective is to find a subtree of $G$ where
 
 $$\sum_{v\in V\left(T\right)}{w_V\left(v\right)x_v}+\sum_{e\in E\left(T\right)}{w_E\left(e\right)x_v}+\sum_{G_i:V\left(T\right)\cap G_i=\emptyset}\pi\left(G_i\right)$$
 
@@ -51,6 +52,40 @@ This problem generalizes several important combinatorial optimization problems:
     \item node weights are generated uniformely at random from $[0,B]$, for some $B\in\mathbb{R}^+$,
     \item group penalties are generated uniformely at random from $[0,B]$, for some $B\in\mathbb{R}^+$.
 \end{itemize}
+
+\section{Greedy algorithm}
+
+\begin{algorithm}
+	\caption{Greedy algorithm for \textbf{NWPCGST}}\label{alg:greedy}
+	\begin{algorithmic}[1]
+		\Procedure{GreedyNWPCGST}{$V,E,\mathcal{G}, w_V, w_E, \pi$}
+        \State $V_S\gets \emptyset$
+        \State $E_S\gets\emptyset$
+        \State $\mbox{min}\gets \infty$
+        \For{$v\in V$}
+            \State $c\gets 0$
+            \State $V_T\gets \{v\}$
+            \While{ exist $i\in[k]$ such that $V_S\cap G_i=\emptyset$}
+                \State compute shortest path $P(V_T,G')$ from $V_T$ to some uncovered group $G'$ of length $\alpha$:
+                $$\alpha \gets \min_{i\in[k]: G_i\cap V_i = \emptyset }d(T,G_i)$$
+                \If{$w_V(P(V_T,G')\setminus V_T) + w_E(P(V_T,G')) < \pi(G')$}
+                    \State $c\gets c + w_V(P(V_T,G')\setminus V_T) + w_E(P(V_T,G'))$
+                    \State $V_T\gets V_T \cup P(V_T,G')$
+                \Else
+                    \State $c\gets c + \pi(G')$
+                \EndIf
+            \EndWhile
+            \If{$c < \mbox{min}$}
+                \State $\mbox{min}\gets c$
+                \State $V_S\gets V_T$
+            \EndIf
+        \EndFor
+        \State compute minimum spanning tree $S$ on $V_S$ on subgraph of $G$ induced by $V_S$ considering only edge weights in graph $G$
+        \State $E_S \gets \mbox{MST}(V_S,G)$
+        \Return $S\gets (V_S,E_S)$
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
 
 \bibliography{combopt}
 \bibliographystyle{plain}
