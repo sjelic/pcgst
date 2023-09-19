@@ -13,3 +13,4 @@ gurobi.lic
 *.out
 *.snm
 *.toc
+*.xml

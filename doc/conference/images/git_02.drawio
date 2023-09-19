@@ -1,0 +1,41 @@
+<mxfile host="65bd71144e">
+    <diagram name="Page-1" id="gsfR2lPIybh8ACA6FocS">
+        <mxGraphModel dx="865" dy="536" grid="1" gridSize="1.9685" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="425" pageHeight="338" background="none" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" value="layer00" style="" parent="0"/>
+                <mxCell id="8" value="" style="shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#4495D1;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;outlineConnect=0;shape=mxgraph.veeam.2d.file_system_browser;aspect=fixed;" vertex="1" parent="1">
+                    <mxGeometry x="13.78" y="17.72" width="198.82" height="198.82" as="geometry"/>
+                </mxCell>
+                <mxCell id="eSA84T2NVFT6d7LiYqhv-20" value="layer01" style="locked=1;" parent="0"/>
+                <mxCell id="3" value="&lt;font face=&quot;Tahoma&quot;&gt;Верзија 1&lt;/font&gt;" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.code_file;pointerEvents=1;" parent="eSA84T2NVFT6d7LiYqhv-20" vertex="1">
+                    <mxGeometry x="17.71999999999997" y="240.16" width="47.5" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="eSA84T2NVFT6d7LiYqhv-19" value="layer02" style="" parent="0"/>
+                <mxCell id="4" value="Верзија 2" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.code_file;pointerEvents=1;" parent="eSA84T2NVFT6d7LiYqhv-19" vertex="1">
+                    <mxGeometry x="88.58000000000001" y="240.16" width="47.5" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="eSA84T2NVFT6d7LiYqhv-18" value="layer03" style="" parent="0"/>
+                <mxCell id="5" value="Верзија 3" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.code_file;pointerEvents=1;" parent="eSA84T2NVFT6d7LiYqhv-18" vertex="1">
+                    <mxGeometry x="157.47850000000003" y="240.1585" width="47.5" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="layer04" parent="0"/>
+                <mxCell id="6" value="Верзија 4" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.code_file;pointerEvents=1;" parent="2" vertex="1">
+                    <mxGeometry x="226.377" y="240.157" width="47.5" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="layer05" parent="0"/>
+                <mxCell id="7" value="Верзија 5" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.code_file;pointerEvents=1;" parent="13" vertex="1">
+                    <mxGeometry x="295.2755" y="240.1555" width="47.5" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="layer06" parent="0"/>
+                <mxCell id="10" value="&lt;font color=&quot;#ff0000&quot;&gt;&lt;b&gt;Свака верзија спрема &lt;br&gt;се у посебан фајл&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="14">
+                    <mxGeometry x="248.96999999999997" y="17.722" width="147.6375" height="41.338499999999996" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="layer07" parent="0"/>
+                <mxCell id="12" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.x;fillColor=#FF0000;strokeColor=#FF0000;aspect=fixed;" vertex="1" parent="15">
+                    <mxGeometry x="286.55" y="80.89" width="72.48" height="72.48" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
