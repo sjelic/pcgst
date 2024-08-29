@@ -58,3 +58,6 @@ Optimal solution found (tolerance 1.00e-04)
 Best objective 3.900000000000e+01, best bound 3.900000000000e+01, gap 0.0000%
 
 User-callback calls 130, time in user-callback 0.01 sec
+
+Gurobi 10.0.2 (linux64, C++) logging started Sat Mar 23 13:02:43 2024
+

@@ -17,24 +17,6 @@
 \usepackage{cleveref}
 \usepackage{algorithm,algpseudocode}  
 
-% nema boja
-% elementi:
-%     - slika
-%     - tabela
-%     - referenca
-%     - templates:
-%         * naslovna strana
-%         * sadržaj
-%         * jedan red + jedna kolona (naslov, podnaslov) sa slikom/tabelom i bez
-%         * jedan red + dve kolone (naslov podnaslov) slika/tabela na levoj ili desnoj strani
-%         * dva reda, u prvom jedna, u drugom dve kolone, sa slikom/tabelom u prvom redu ili u drugom redu desnoj kolovni, ili bez
-%         * dva reda, u prvom dve kolone, u drugom jena, sa slikom/tabelom u drugom redu, ili u prvom redu u desnoj koloni, ili bez
-
-
-
-
-%\usetheme {default}
-
 
 \usepackage[doi=false,
 	isbn=false,
@@ -51,10 +33,10 @@
 
 % Title page details
 \title {A $(\log n)$-approximation algorithm for Node Weighted Prize Collecting Group Steiner tree problem with bounded group size}
-\subtitle{50th International Symposium on Operational Research\\ Symopis 2023}
-\author{Dr Slobodan Jelic}
-\institute{University of Belgrade, Faculty of Civil Engineering\\ Department of Geodesy and Geoinformatics}
-\date{Mount Tara, September 18-21, 2023}
+\subtitle{Seminar za računarstvo i primenjenu matematiku\\ Matematički institut SANU}
+\author{Doc. dr Slobodan Jelić}
+\institute{Univerzitet u Beogradu, Građevinski fakultet\\Katedra za geodeziju i geoinformatiku}
+\date{Beograd, 2. april 2024.}
 
 % Image Logo
 %\logo{\includegraphics[width=2.5cm]{Beamer-Logo.png}} 
@@ -64,9 +46,7 @@
 % naslovna strana
 \begin{frame}
 \titlepage
-\begin{center}
-    \includegraphics[width=0.9\textwidth]{images/logo.pdf}
-\end{center}
+
 
 \end{frame}
 
@@ -152,7 +132,7 @@
 \begin{frame}{\insertsection}{\insertsubsection}
     \begin{block}{}
         \begin{itemize}
-            \item the most studied version of the group Steiner tree problem comes with edge weigh{gargPolylogarithmicApproximationAlgorithm2000}
+            \item the most studied version of the group Steiner tree problem comes with edge weights\autocite{gargPolylogarithmicApproximationAlgorithm2000}
             \item the edge weighted group Steiner tree problem with bounded group size-  $2\gamma$ approximation algorithm using rounding technique for relaxation of natural cut-based formulation \autocite{slavikApproximationAlgorithmsSet1998}
             \item prize collecting group Steiner tree problem with bounded group size - constant factor approximation \autocite{glicksmanApproximationAlgorithmsGroup2008}
         \end{itemize}
@@ -184,18 +164,46 @@
 \end{frame}
 
 
+
+
 \subsection*{Node weighted \alert{prize-collecting} Group Steiner tree problem with bounded group size (NW\alert{PC}GST-$\gamma$)}
 \begin{frame}{\insertsection}{\insertsubsection}
     \begin{block}{}
         \begin{itemize}[<+->]
-            \item application of randomized rounding technique to compute the subset of groups $\mathcal{G}'$ that will be covered (i.e., the rest of uncovered groups will be penalized)
+            \item solve LP relaxation of the integer programming formulation of the problem
+            \item apply randomized rounding technique to the optimal fractional solution to compute the subset of groups $\mathcal{G}'$ that will be covered (i.e., the rest of uncovered groups will be penalized)
             \item solve NWGST-$\gamma$ for $\mathcal{G}'$
             \item proof that the expected sum of weights and penalities is at most $O(\log n)$ times optimal
         \end{itemize}
     \end{block}
 \end{frame}
 
+
+
+
 \section{Algorithms and Analysis}
+
+
+\begin{frame}{\insertsection}{\insertsubsection}
+    \begin{block}{}
+        \includegraphics<+>[width=0.925\textwidth]{images/rounding_00.pdf}
+        \includegraphics<+>[width=0.925\textwidth]{images/rounding_01.pdf}
+    \end{block}
+\end{frame}
+
+\subsection*{Algorithm Outline: NWGST-$\gamma$}
+
+
+\begin{frame}{\insertsection}{\insertsubsection}
+    \begin{block}{}
+        \includegraphics<+>[width=0.925\textwidth]{images/representatives_00.pdf}
+        \includegraphics<+>[width=0.925\textwidth]{images/representatives_01.pdf}
+        \includegraphics<+>[width=0.925\textwidth]{images/representatives_02.pdf}
+        \includegraphics<+>[width=0.925\textwidth]{images/representatives_03.pdf}
+        \includegraphics<+>[width=0.925\textwidth]{images/representatives_04.pdf}
+    \end{block}
+\end{frame}
+
 \subsection*{Notations}
 \begin{frame}{\insertsection}{\insertsubsection}
     \begin{itemize}
@@ -224,6 +232,16 @@
     \end{itemize}
 \end{frame}
 
+\begin{frame}{\insertsection}{\insertsubsection}
+    \begin{block}{}
+        \includegraphics<+>[width=0.925\textwidth]{images/maxflowmincut_00.pdf}
+        \includegraphics<+>[width=0.925\textwidth]{images/maxflowmincut_01.pdf}
+        \includegraphics<+>[width=0.925\textwidth]{images/maxflowmincut_02.pdf}
+        \includegraphics<+>[width=0.925\textwidth]{images/maxflowmincut_03.pdf}
+    \end{block}
+\end{frame}
+
+
 \subsection*{Relaxation of ILP-NWGST-$\gamma$}
 
 \begin{frame}{\insertsection}{\insertsubsection}
@@ -240,6 +258,10 @@
 \end{frame}
 
 \subsection*{Deterministic rounding for NWGST-$\gamma$}
+
+
+
+
 
 \begin{frame}{\insertsection}{\insertsubsection}
     \begin{algorithmic}[1]
@@ -383,12 +405,53 @@ $$\pi\left(T\right)\leq\frac{1}{\alpha}\sum_{i=1}^{k}{\pi\left(G_i\right)z_{G_i}
 
 \end{frame}
 
+\subsection*{Derandomization}
+\begin{frame}{\insertsection}{\insertsubsection}
+    \begin{itemize}
+        \item the algorithm \textrm{NWPCGSTRounding} can be derandomized with the cost o $O(k)$ factor in the running time
+        \item probabilistic argument is used only for theoretical analysis
+        \item try all possible values of $\alpha$ instead of selecting one value at random
+    \end{itemize}
+   
+
+\end{frame}
+
+
+\begin{frame}{\insertsection}{\insertsubsection}
+    \begin{block}{}
+        \includegraphics<+>[width=0.77\textwidth]{images/derandomization_00.pdf}
+        \includegraphics<+>[width=0.77\textwidth]{images/derandomization_01.pdf}
+        \includegraphics<+>[width=0.77\textwidth]{images/derandomization_02.pdf}
+        \includegraphics<+>[width=0.77\textwidth]{images/derandomization_03.pdf}
+        \includegraphics<+>[width=0.77\textwidth]{images/derandomization_04.pdf}
+        \includegraphics<+>[width=0.77\textwidth]{images/derandomization_05.pdf}
+    \end{block}
+\end{frame}
+
 
 \section{Future work}
 
 \begin{frame}{\insertsection}{\insertsubsection}
     \begin{itemize}
-        \item derandomization of randomized rounding algorithm for node weighted prize collecting Steiner tree problem,
+        \item two directions:\begin{itemize}
+            \item generalize to submodular penalties\autocite{zhangApproximationAlgorithmGroup2022}:\begin{itemize}
+                \item $U\neq \emptyset$, $\pi: 2^U\rightarrow \mathbb{R}_+$ such that:
+                $$\forall X,Y\subseteq U, f(X\cup Y) + f(X\cap Y)\leq f(X) + f(Y).$$
+            \end{itemize}
+            \item generalize to survivable set connectivity\autocite{chenSurvivableNetworkDesign2022} \begin{itemize}
+                \item increase edge (vertex) connectivity fo the solution graph
+                \item generally, connect pairs of subsets with $l$ edge (vertex) - disjoint paths 
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+   
+
+\end{frame}
+
+
+
+\begin{frame}{\insertsection}{\insertsubsection}
+    \begin{itemize}
         \item efficient solution of LP relaxation,
         \item implementation of algorithm,
         \item improvement of the solution with theoretical guarantee with (meta)heuritic method.
