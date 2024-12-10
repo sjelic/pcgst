@@ -397,6 +397,181 @@ Solution Solver::basic_greedy()
     return s;
 }
 
+Solution Solver::random_greedy(int r)
+{
+    int n=graph.size();
+    Solution s = Solution();
+    s.numberOfUncoveredGroups.resize(n);
+
+    s.fc=0;
+
+    for(int i=0;i<n;i++)
+        s.numberOfUncoveredGroups[i]=0;
+    
+    for(int g=0;g<groups.size();g++)
+    {
+        s.fc+=groups[g].penalty; //prazno resenje ima sumu svih penala za fc
+        for(int v : groups[g].vertices)
+        {
+            s.numberOfUncoveredGroups[v] +=1;
+        }
+    }
+
+    set<int> candidates;   //kandidati za cvor za najvece smanjenje fc
+    for(int i=0;i<n;i++)
+    {
+        if(s.numberOfUncoveredGroups[i]>0)
+            candidates.insert(i);  //samo ako mogu da smanje penale tj postoji nepokrivena grupa kojoj pripada
+    }
+    //pq najboljih r opcija za kandidata
+    //trazimo prvi cvor
+    priority_queue<pair<int,int>> pq; // first: fc , second: kandidat
+    
+    for(int cand : candidates)
+    {
+        int p_fc=s.fc;
+        int penali=0;
+        for(int g=0;g<groups.size();g++)
+        {
+            if(groups[g].vertices.find(cand)!=groups[g].vertices.end())
+            {
+                penali+=groups[g].penalty;
+            }
+        }
+        p_fc=p_fc+weights[cand]-penali;
+        //update pq-a
+        if(pq.size()<r && p_fc<s.fc) //ako resenje poboljsava a pq nije napunjen
+        {
+            pq.push({p_fc,cand});
+        }
+        else if(pq.size()==r && (pq.top().first)>p_fc) //ako je bolji od najgoreg u punom pq-u
+        {
+            pq.pop();
+            pq.push({p_fc,cand});
+        }
+    }
+    //uzimamo random kandidata iz pq-a i updatujemo solution
+    if(pq.size()!=0)
+    {
+        int random = rand() % pq.size();
+        for(int i=0;i<random;i++)
+           pq.pop();
+
+        int prvi = pq.top().second;
+        s.fc = pq.top().first;
+
+        for(int g=0;g<groups.size();g++)
+        {
+            if(groups[g].vertices.find(prvi)!=groups[g].vertices.end())
+            {
+                s.groups.insert(g); 
+                //dodali smo grupu pa izbacujemo kandidate kojima je to bila poslednja nepokrivena grupa
+                for(int cv : groups[g].vertices)
+                {
+                    s.numberOfUncoveredGroups[cv]--;
+                    if(s.numberOfUncoveredGroups[cv]==0)
+                        candidates.erase(cv);
+                }
+            }
+        }
+        s.vertices.push_back(prvi);
+        candidates.erase(prvi); 
+        // Resenje sad ima jedan cvor.
+        dijkstra(prvi);
+    }
+    else //prazan pq znaci niko ne poboljsava fc
+    {
+        return s;
+    }
+
+    
+
+    //ostali cvorovi
+    while(!candidates.empty())
+    {
+        priority_queue<pair<int,pair<int,int>>> pq; // (fc,(kandidat,cvor do kojeg))
+        for(int p_cand : candidates)
+        {
+            int p_min=s.fc;  
+            int p_cvor_do_kojeg=-1;  
+            for(int v : s.vertices) // v predstavlja cvor do kojeg
+            {
+                int tezina_puta = totalWeightOfShortestPath(v,p_cand)-weights[v];
+                int penali=0;
+                //racunamo penale koji bi se oduzeli
+                for(int g : groupsOnShortestPath(v,p_cand))
+                {
+                    if(s.groups.find(g)==s.groups.end())
+                    {
+                        penali+=groups[g].penalty; //ako grupa nije u solutionu oduzecemo penal
+                    }
+                }
+                if(p_min>s.fc+tezina_puta-penali)
+                {
+                    p_min = s.fc+tezina_puta-penali;
+                    p_cvor_do_kojeg=v;
+                }
+            } 
+            // za ovaj p_cand smo nasli najbolji cvor do kojeg
+            // ispitujemo da li treba dodati p_min,p_cand,p_cvordokojeg u pq
+            if(p_min<s.fc && pq.size()<r)
+            {
+                pq.push({p_min,{p_cand,p_cvor_do_kojeg}});
+            }
+            else if (p_min<s.fc && pq.size()==r && pq.top().first > p_min)
+            {
+                pq.pop();
+                pq.push({p_min,{p_cand,p_cvor_do_kojeg}});
+            }
+            
+        }
+        //uzimamo random iz pq-a
+        if(pq.size()>0)
+        {
+            int random = rand() % r;
+            for(int i=0;i<random;i++)
+                pq.pop();
+            
+            int nova_fc = pq.top().first;
+            int cand = pq.top().second.first;
+            int cvor_do_kojeg = pq.top().second.second;
+
+            //update solutiona
+            for(int u : verticesOnShortestPath(cvor_do_kojeg,cand))
+            {
+                if(u!=cvor_do_kojeg)
+                    s.vertices.push_back(u);
+            }
+            for(int g : groupsOnShortestPath(cvor_do_kojeg,cand))
+            {
+                s.groups.insert(g);
+                //dodali smo grupu pa izbacujemo kandidate kojima je to bila poslednja nepokrivena grupa
+                for(int cv : groups[g].vertices)
+                {
+                    s.numberOfUncoveredGroups[cv]--;
+                    if(s.numberOfUncoveredGroups[cv]==0)
+                        candidates.erase(cv);
+                }
+            }
+            s.fc = nova_fc;
+            //izbaci put iz kandidata
+            for(int c : verticesOnShortestPath(cvor_do_kojeg,cand))
+            {
+                candidates.erase(c);
+                dijkstra(c);
+            }
+            
+        }
+        else
+        {
+            //pq prazan znaci nijedan cvor ne poboljsava ciljnu funkciju
+            return s;
+        }
+    }
+
+    return s;
+}
+
 int indeks_u_s(edge e,Solution& s)
 {
     for(int i=0;i<s.getVertices().size();i++)

@@ -27,6 +27,8 @@ public:
     void dijkstra(int u); //popunjava parents i sh_path samo za cvor u
     void generateEdges(Solution& s); //prim
     Solution basic_greedy(); //generates vertices, najpohlepnija verzija
+    Solution random_greedy(int r); //generates vertices, u svakoj iteraciji uzima jedno od r najboljih opcija
+
 
     int totalWeightOfShortestPath(int u, int v);
     set<int> groupsOnShortestPath(int u,int v);
