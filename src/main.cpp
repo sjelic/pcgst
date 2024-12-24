@@ -1,21 +1,34 @@
 #include <iostream>
-#include "solution.hpp"
-#include "solver.hpp"
+#include "solution.h"
+#include "solver.h"
 #include <chrono>
 
-int main(int argc,char* args[])
+void runTest(string& filename)
 {
     auto start = chrono::high_resolution_clock::now();
 
-    Solver s = Solver();
-    s.loadGraph(args[1],"../data"); 
-    Solution sol = s.basic_greedy();
-    s.generateEdges(sol);
-    s.format_txt(sol,args[1],"solutions");
+    Solver* s = new Solver("../data/tests/"+filename);
+    Solution sol = s->basicGreedy();
+    s->generateEdges(sol);
+    sol.toTxt(s,filename,"../data/solutions");
 
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double> elapsed = end - start;
     cout<<"Execution time: " << elapsed.count() <<endl;
+}
+
+int main()
+{
+    ifstream file("../data/instances.txt");
+    if (!file.is_open()) {
+        throw runtime_error("Failed to open instances.txt");
+    }
+
+    string filename;
+    while(getline(file,filename))
+    {
+        runTest(filename);
+    }
 
     return 0;
 }

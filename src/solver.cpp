@@ -1,265 +1,36 @@
-#include "solver.hpp"
+#include "solver.h"
 
-
-
-void Solver::loadGraph(char* filename,string dirpath)
+Solver::Solver(const string& filepath)
 {
-    char* path =(char*) malloc (sizeof(filename)+128);
-    
-    if(path==NULL)
-    {
-        fprintf(stderr,"malloc.\n");
-        exit(EXIT_FAILURE);
-    }
-    strcat(path,dirpath.c_str());
-    strcat(path,"/");
-    strcat(path,filename);
-    
-    FILE* f = fopen(path,"r");
-    if(f==NULL)
-    {
-        fprintf(stderr,"Neuspesno otvaranje fajla.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    char line[512];
-    int n,e;
-    fgets(line,512,f);
-    while(strncmp(line,"SECTION Graph\n",13)!=0)
-    {
-            fgets(line,512,f);
-    }
-
-    fscanf(f,"Nodes %d\n",&n);
-    fscanf(f,"Edges %d\n",&e);
-    
-    graph.resize(n);
-    weights.resize(n);
-
-    for(int i=0;i<n;i++)
-    {
-        fscanf(f,"N %d\n",&weights[i]);
-    }
-
-    int u,v,w;
-    for(int i=0;i<e;i++)
-    {
-        fscanf(f,"E %d %d %d\n",&u,&v,&w);
-        graph[u].push_back({v,w});
-        graph[v].push_back({u,w});
-    }
-
-    while(strncmp(line,"SECTION Terminals\n",17)!=0)
-            fgets(line,512,f);
-
-    int gr_num;
-
-    fscanf(f,"Terminals %d\n",&gr_num);
-    
-    groups.resize(gr_num);
-
-    for(int i=0;i<gr_num;i++)
-    {
-        fscanf(f,"P %d\n",&groups[i].penalty);
-    }
-    
-    for(int i=0;i<gr_num;i++)
-    {
-        fgets(line,512,f);
-        istringstream iss((string)line);
-        char t;
-        iss >> t;
-        int v;
-        while(iss >> v)
-        {
-            groups[i].vertices.insert(v);
-        }
-    }
-    
-    fclose(f);
-    resizeAtributes();
+    graph->loadGraph(filepath);
 }
 
-void Solver::format_txt(Solution& sol,string name, string dir_name)
+void Solver::findShortestPath(int u)
 {
-    name="./"+dir_name+"/"+name;
-    auto last_dot = name.find_last_of('.');
-    name=name.substr(0,last_dot);
-    char* filename = (char*)malloc(name.length()+5);
-    if(filename==NULL)
-    {
-        cerr << "Error: malloc\n";
-        return;
-    }
-    strcpy(filename, name.c_str());
-    strcat(filename,".txt");
-    FILE* f = fopen(filename,"w");
-    if(f==NULL)
-    {
-        cerr << "Error: " << filename << " couldn't be opened.\n";
-        return;
-    }
-
-    cout<<filename << " se pise...\n";
-
-    fprintf(f,"SECTION Graph\n");
-    fprintf(f,"Nodes %ld\n",graph.size());
-    fprintf(f,"Edges %ld\n",sol.edges.size());
-
-    for(pair<int,int> p : sol.edges)
-    {
-        fprintf(f,"E %d %d %d\n", p.first, p.second, tezina_grane(p.first,p.second,graph));
-    }
-
-    fprintf(f,"END\n");
-
-    cout<<"Gotovo.\n";
-
-    fclose(f); 
+    graph->findShortestPath(u);
 }
 
-void Solver::resizeAtributes()
+void Solver::generateEdges(Solution& sol)
 {
-    int n = graph.size();
-    shortest_path.resize(n);
-    parents.resize(n);
+    graph->generateEdges(sol);
 }
 
-void Solver::generateEdges(Solution& s)
+Solution Solver::basicGreedy()
 {
-    
-    int n = s.getVertices().size();
-    if(n==0)
-        return;
-    s.connection.resize(n);
-    for(int i=0;i<n;i++)
-        s.connection[i]={-1,numeric_limits<int>::max()};
-    
-	vector<bool> dodat(n, false); 
-	set< pair<int, int> > pq;
-    
-	pq.insert({0, 0});
-
-    while(!pq.empty()) {
-		int v = pq.begin()->second;
-		pq.erase(pq.begin());
-		dodat[v] = true;
-
-		for(edge e : graph[s.getVertices()[v]]) { // e koristi graph indekse....
-            int indeks = indeks_u_s(e,s);
-            if(indeks==-1)
-                continue;
-            //dobili smo s.vertices indeks suseda
-			int duzina = e.w;
-			if(!dodat[indeks] && duzina < s.connection[indeks].w) {
-				pq.erase({s.connection[indeks].w, indeks});
-				s.connection[indeks] = {v, duzina};
-				pq.insert({s.connection[indeks].w, indeks});
-			}
-		}
-	}
-
-    //da ne bi modifikovao algoritam tek sad menjamo podatke u pogodniji oblik
-    for(int u=1;u<s.connection.size();u++)
-    {
-         s.edges.insert(make_pair(s.vertices[u], s.vertices[s.connection[u].neighbour]));
-    }
-
-}
-
-int Solver::totalWeightOfShortestPath(int u,int i)
-{
-    int totalWeight=weights[i];
-    int pom=i;
-
-    while(parents[u][pom]!=-1)
-    {
-        totalWeight+=weights[parents[u][pom]]+tezina_grane(pom,parents[u][pom],graph);
-        pom=parents[u][pom];
-    }
-
-    return totalWeight;
-}
-
-set<int> Solver::groupsOnShortestPath(int i,int j)
-{
-    set<int> coveredGroups;
-    for(int u : verticesOnShortestPath(i,j))
-                for(int g=0;g<groups.size();g++)
-                {
-                    if(groups[g].vertices.find(u)!=groups[g].vertices.end())
-                    {
-                        coveredGroups.insert(g);
-                    }
-                }
-    return coveredGroups;
-}
-
-vector<int> Solver::verticesOnShortestPath(int u,int i)
-{
-    vector<int> vertices;
-    vertices.push_back(i);
-    int pom=i;
-
-    while(parents[u][pom]!=-1)
-    {
-        vertices.push_back(parents[u][pom]);
-        pom=parents[u][pom];
-    }
-
-    return vertices;
-}
-
-void Solver::dijkstra(int u)
-{
-    int n=graph.size();
-    shortest_path[u].resize(n);
-    parents[u].resize(n);
-
-    for(int i=0;i<n;i++)
-        shortest_path[u][i]=numeric_limits<int>::max();
-    shortest_path[u][u]=weights[u];
-    set<pair<int,int> > skup; // rastojanje,cvor
-    skup.insert({shortest_path[u][u],u});
-
-    parents[u][u]=-1;
-
-    while(!skup.empty())
-    {
-        int v=skup.begin()->second;
-        skup.erase(skup.begin());
-        for(edge g : graph[v])
-        {
-            if(g.w+weights[g.neighbour]+shortest_path[u][v]<shortest_path[u][g.neighbour])
-            {
-                skup.erase({shortest_path[u][g.neighbour],g.neighbour});
-                shortest_path[u][g.neighbour]=g.w+weights[g.neighbour]+shortest_path[u][v];
-                skup.insert({shortest_path[u][g.neighbour],g.neighbour});
-                parents[u][g.neighbour]=v;
-            }
-        }
-    }
-}
-
-
-Solution Solver::basic_greedy()
-{
-    int n=graph.size();
-    int gr_num=groups.size();
+    int n=getGraphSize();
+    int gr_num=getGroups().size();
     Solution s = Solution();
-    s.numberOfUncoveredGroups.resize(n);
-
-    s.fc=0;
-
+    s.setCost(0);
+    s.getNCGC().resize(n);
     for(int i=0;i<n;i++)
-        s.numberOfUncoveredGroups[i]=0;
+        s.getNCGC()[i]=0;
     
-    for(int g=0;g<groups.size();g++)
+    for(int g=0;g<gr_num;g++)
     {
-        s.fc+=groups[g].penalty; //prazno resenje ima sumu svih penala za fc
-        for(int v : groups[g].vertices)
+        s.setCost(s.getCost()+getGroups()[g].getPenalty()); //prazno resenje ima sumu svih penala za fc
+        for(int v : getGroups()[g].getNodes())
         {
-            s.numberOfUncoveredGroups[v] +=1;
+            s.getNCGC()[v] +=1;
         }
     }
 
@@ -268,49 +39,49 @@ Solution Solver::basic_greedy()
     set<int> candidates;   //kandidati za cvor za najvece smanjenje fc
     for(int i=0;i<n;i++)
     {
-        if(s.numberOfUncoveredGroups[i]>0)
+        if(s.getNCGC()[i]>0)
             candidates.insert(i);  //samo ako mogu da smanje penale tj postoji nepokrivena grupa kojoj pripada
     }
     
     //trazimo prvi cvor
     int prvi=-1;
-    int min_fc=s.fc;
+    int min_fc=s.getCost();
     for(int cand : candidates)
     {
-        int p_fc=s.fc;
+        int p_fc=s.getCost();
         int penali=0;
         for(int g=0;g<gr_num;g++)
         {
-            if(groups[g].vertices.find(cand)!=groups[g].vertices.end())
+            if(getGroups()[g].containsNode(cand))
             {
-                penali+=groups[g].penalty;
+                penali+=getGroups()[g].getPenalty();
             }
         }
-        p_fc=p_fc+weights[cand]-penali;
+        p_fc=p_fc+getWeights()[cand]-penali;
         if(min_fc>p_fc)
         {   
             min_fc=p_fc;
             prvi=cand;
         }
     }
-    if(min_fc<s.fc)
+    if(min_fc<s.getCost())
     {
-        s.fc=min_fc;
+        s.setCost(min_fc);
         for(int g=0;g<gr_num;g++)
         {
-            if(groups[g].vertices.find(prvi)!=groups[g].vertices.end())
+            if(getGroups()[g].containsNode(prvi))
             {
-                s.groups.insert(g); 
+                s.addGroup(g); 
                 //dodali smo grupu pa izbacujemo kandidate kojima je to bila poslednja nepokrivena grupa
-                for(int cv : groups[g].vertices)
+                for(int cv : getGroups()[g].getNodes())
                 {
-                    s.numberOfUncoveredGroups[cv]--;
-                    if(s.numberOfUncoveredGroups[cv]==0)
+                    s.getNCGC()[cv]--;
+                    if(s.getNCGC()[cv]==0)
                         candidates.erase(cv);
                 }
             }
         }
-        s.vertices.push_back(prvi);
+        s.addNode(prvi);
         candidates.erase(prvi); 
     }
     else
@@ -319,7 +90,7 @@ Solution Solver::basic_greedy()
     }
 
     // Resenje sad ima jedan cvor.
-    dijkstra(prvi);
+    findShortestPath(prvi);
 
     //ostali cvorovi
     while(!candidates.empty())
@@ -329,23 +100,23 @@ Solution Solver::basic_greedy()
         int cvor_do_kojeg=-1; // od ovog cvora iz resenja
         for(int p_cand : candidates)
         {
-            int p_min=s.fc;  
+            int p_min=s.getCost();  
             int p_cvor_do_kojeg=-1;  
-            for(int v : s.vertices) // v predstavlja cvor do kojeg
+            for(int v : s.getNodes()) // v predstavlja cvor do kojeg
             {
-                int tezina_puta = totalWeightOfShortestPath(v,p_cand)-weights[v];
+                int tezina_puta = totalWeightOfShortestPath(v,p_cand)-getWeights()[v];
                 int penali=0;
                 //racunamo penale koji bi se oduzeli
                 for(int g : groupsOnShortestPath(v,p_cand))
                 {
-                    if(s.groups.find(g)==s.groups.end())
+                    if(!s.containsGroup(g))
                     {
-                        penali+=groups[g].penalty; //ako grupa nije u solutionu oduzecemo penal
+                        penali+=getGroups()[g].getPenalty(); //ako grupa nije u solutionu oduzecemo penal
                     }
                 }
-                if(p_min>s.fc+tezina_puta-penali)
+                if(p_min>s.getCost()+tezina_puta-penali)
                 {
-                    p_min = s.fc+tezina_puta-penali;
+                    p_min = s.getCost()+tezina_puta-penali;
                     p_cvor_do_kojeg=v;
                 }
             } 
@@ -358,32 +129,32 @@ Solution Solver::basic_greedy()
             }
         }
         //ovde smo nasli i cand i cvor do kojeg
-        if(minimum<s.fc) // ako popravljamo fc
+        if(minimum<s.getCost()) // ako popravljamo fc
         {
             //update solutiona
             for(int u : verticesOnShortestPath(cvor_do_kojeg,cand))
             {
                 if(u!=cvor_do_kojeg)
-                    s.vertices.push_back(u);
+                    s.addNode(u);
             }
             for(int g : groupsOnShortestPath(cvor_do_kojeg,cand))
             {
-                s.groups.insert(g);
+                s.addGroup(g);
                 //dodali smo grupu pa izbacujemo kandidate kojima je to bila poslednja nepokrivena grupa
-                for(int cv : groups[g].vertices)
+                for(int cv : getGroups()[g].getNodes())
                 {
-                    s.numberOfUncoveredGroups[cv]--;
-                    if(s.numberOfUncoveredGroups[cv]==0)
+                    s.getNCGC()[cv]--;
+                    if(s.getNCGC()[cv]==0)
                         candidates.erase(cv);
                 }
             }
-            s.fc = minimum;
+            s.setCost(minimum);
             //izbaci put iz kandidata
             for(int c : verticesOnShortestPath(cvor_do_kojeg,cand))
             {
                 candidates.erase(c);
                 //trebace nam najkraci puutevi do novih cvorova iz solutiona
-                dijkstra(c);
+                findShortestPath(c);
             }
             
         }
@@ -397,30 +168,28 @@ Solution Solver::basic_greedy()
     return s;
 }
 
-Solution Solver::random_greedy(int r)
+Solution Solver::randomGreedy(int r)
 {
-    int n=graph.size();
+    int n=getGraphSize();
     Solution s = Solution();
-    s.numberOfUncoveredGroups.resize(n);
-
-    s.fc=0;
-
+    s.setCost(0);
+    s.getNCGC().resize(n);
     for(int i=0;i<n;i++)
-        s.numberOfUncoveredGroups[i]=0;
+        s.getNCGC()[i]=0;
     
-    for(int g=0;g<groups.size();g++)
+    for(int g=0;g<getGroups().size();g++)
     {
-        s.fc+=groups[g].penalty; //prazno resenje ima sumu svih penala za fc
-        for(int v : groups[g].vertices)
+        s.setCost(s.getCost()+getGroups()[g].getPenalty()); //prazno resenje ima sumu svih penala za fc
+        for(int v : getGroups()[g].getNodes())
         {
-            s.numberOfUncoveredGroups[v] +=1;
+            s.getNCGC()[v] +=1;
         }
     }
 
     set<int> candidates;   //kandidati za cvor za najvece smanjenje fc
     for(int i=0;i<n;i++)
     {
-        if(s.numberOfUncoveredGroups[i]>0)
+        if(s.getNCGC()[i]>0)
             candidates.insert(i);  //samo ako mogu da smanje penale tj postoji nepokrivena grupa kojoj pripada
     }
     //pq najboljih r opcija za kandidata
@@ -429,18 +198,18 @@ Solution Solver::random_greedy(int r)
     
     for(int cand : candidates)
     {
-        int p_fc=s.fc;
+        int p_fc=s.getCost();
         int penali=0;
-        for(int g=0;g<groups.size();g++)
+        for(int g=0;g<getGroups().size();g++)
         {
-            if(groups[g].vertices.find(cand)!=groups[g].vertices.end())
+            if(getGroups()[g].containsNode(cand))
             {
-                penali+=groups[g].penalty;
+                penali+=getGroups()[g].getPenalty();
             }
         }
-        p_fc=p_fc+weights[cand]-penali;
+        p_fc=p_fc+getWeights()[cand]-penali;
         //update pq-a
-        if(pq.size()<r && p_fc<s.fc) //ako resenje poboljsava a pq nije napunjen
+        if(pq.size()<r && p_fc<s.getCost()) //ako resenje poboljsava a pq nije napunjen
         {
             pq.push({p_fc,cand});
         }
@@ -458,26 +227,26 @@ Solution Solver::random_greedy(int r)
            pq.pop();
 
         int prvi = pq.top().second;
-        s.fc = pq.top().first;
+        s.setCost(pq.top().first);
 
-        for(int g=0;g<groups.size();g++)
+        for(int g=0;g<getGroups().size();g++)
         {
-            if(groups[g].vertices.find(prvi)!=groups[g].vertices.end())
+            if(getGroups()[g].containsNode(prvi))
             {
-                s.groups.insert(g); 
+                s.addGroup(g); 
                 //dodali smo grupu pa izbacujemo kandidate kojima je to bila poslednja nepokrivena grupa
-                for(int cv : groups[g].vertices)
+                for(int cv : getGroups()[g].getNodes())
                 {
-                    s.numberOfUncoveredGroups[cv]--;
-                    if(s.numberOfUncoveredGroups[cv]==0)
+                    s.getNCGC()[cv]--;
+                    if(s.getNCGC()[cv]==0)
                         candidates.erase(cv);
                 }
             }
         }
-        s.vertices.push_back(prvi);
+        s.addNode(prvi);
         candidates.erase(prvi); 
         // Resenje sad ima jedan cvor.
-        dijkstra(prvi);
+        findShortestPath(prvi);
     }
     else //prazan pq znaci niko ne poboljsava fc
     {
@@ -492,33 +261,33 @@ Solution Solver::random_greedy(int r)
         priority_queue<pair<int,pair<int,int>>> pq; // (fc,(kandidat,cvor do kojeg))
         for(int p_cand : candidates)
         {
-            int p_min=s.fc;  
+            int p_min=s.getCost();  
             int p_cvor_do_kojeg=-1;  
-            for(int v : s.vertices) // v predstavlja cvor do kojeg
+            for(int v : s.getNodes()) // v predstavlja cvor do kojeg
             {
-                int tezina_puta = totalWeightOfShortestPath(v,p_cand)-weights[v];
+                int tezina_puta = totalWeightOfShortestPath(v,p_cand)-getWeights()[v];
                 int penali=0;
                 //racunamo penale koji bi se oduzeli
                 for(int g : groupsOnShortestPath(v,p_cand))
                 {
-                    if(s.groups.find(g)==s.groups.end())
+                    if(!s.containsGroup(g))
                     {
-                        penali+=groups[g].penalty; //ako grupa nije u solutionu oduzecemo penal
+                        penali+=getGroups()[g].getPenalty(); //ako grupa nije u solutionu oduzecemo penal
                     }
                 }
-                if(p_min>s.fc+tezina_puta-penali)
+                if(p_min>s.getCost()+tezina_puta-penali)
                 {
-                    p_min = s.fc+tezina_puta-penali;
+                    p_min = s.getCost()+tezina_puta-penali;
                     p_cvor_do_kojeg=v;
                 }
             } 
             // za ovaj p_cand smo nasli najbolji cvor do kojeg
             // ispitujemo da li treba dodati p_min,p_cand,p_cvordokojeg u pq
-            if(p_min<s.fc && pq.size()<r)
+            if(p_min<s.getCost() && pq.size()<r)
             {
                 pq.push({p_min,{p_cand,p_cvor_do_kojeg}});
             }
-            else if (p_min<s.fc && pq.size()==r && pq.top().first > p_min)
+            else if (p_min<s.getCost() && pq.size()==r && pq.top().first > p_min)
             {
                 pq.pop();
                 pq.push({p_min,{p_cand,p_cvor_do_kojeg}});
@@ -540,25 +309,25 @@ Solution Solver::random_greedy(int r)
             for(int u : verticesOnShortestPath(cvor_do_kojeg,cand))
             {
                 if(u!=cvor_do_kojeg)
-                    s.vertices.push_back(u);
+                    s.addNode(u);
             }
             for(int g : groupsOnShortestPath(cvor_do_kojeg,cand))
             {
-                s.groups.insert(g);
+                s.addGroup(g);
                 //dodali smo grupu pa izbacujemo kandidate kojima je to bila poslednja nepokrivena grupa
-                for(int cv : groups[g].vertices)
+                for(int cv : getGroups()[g].getNodes())
                 {
-                    s.numberOfUncoveredGroups[cv]--;
-                    if(s.numberOfUncoveredGroups[cv]==0)
+                    s.getNCGC()[cv]--;
+                    if(s.getNCGC()[cv]==0)
                         candidates.erase(cv);
                 }
             }
-            s.fc = nova_fc;
+            s.setCost(nova_fc);
             //izbaci put iz kandidata
             for(int c : verticesOnShortestPath(cvor_do_kojeg,cand))
             {
                 candidates.erase(c);
-                dijkstra(c);
+                findShortestPath(c);
             }
             
         }
@@ -572,21 +341,24 @@ Solution Solver::random_greedy(int r)
     return s;
 }
 
-int indeks_u_s(edge e,Solution& s)
+int Solver::getGraphSize()
 {
-    for(int i=0;i<s.getVertices().size();i++)
-    {
-        if(s.getVertices()[i]==e.neighbour)
-        {
-            return i;
-        }
-    }
-    return -1;
+    return graph->getSize();
 }
 
-int tezina_grane(int u,int v,vector<vector<edge>>& graph)
+vector<int>& Solver::getWeights()
 {
-    for(edge g : graph[u])
+    return graph->getWeights();
+}
+
+vector<Group>& Solver::getGroups()
+{
+    return graph->getGroups();
+}
+
+int Solver::tezina_grane(int u,int v)
+{
+    for(edge g : graph->getGraph()[u])
     {
         if(g.neighbour==v)
             return g.w;
