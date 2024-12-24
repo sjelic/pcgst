@@ -1,7 +1,6 @@
 #pragma once
 
 #include "graph.h"
-#include "solver.h"
 
 class Solution {
 
@@ -24,7 +23,7 @@ public:
     void printNodes();
     bool containsNode(int u);
 
-    void toTxt(Solver* solver,const string& name,const string& dir_name); //generates .txt
+    void toTxt(const string& name,const string& dir_name); //generates .txt
 
 private:
     vector<int> nodes;

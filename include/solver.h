@@ -28,8 +28,10 @@ public:
     int getGraphSize();
     vector<int>& getWeights();
     vector<Group>& getGroups();
+    vector<edge>& getNeighboursOf(int u);
     int tezina_grane(int u,int v); //to do better...
 
+    int indeks_u_s(edge e,Solution& s); //to do better...
 
 
 private:

@@ -42,48 +42,6 @@ void Graph::findShortestPath(int u)
     }
 }
 
-void Graph::generateEdges(Solution& s)
-{
-    
-    int n = s.getNodes().size();
-    if(n==0)
-        return;
-    s.getConnection().resize(n);
-    for(int i=0;i<n;i++)
-        s.getConnection()[i]={-1,numeric_limits<int>::max()};
-    
-	vector<bool> dodat(n, false); 
-	set< pair<int, int> > pq;
-    
-	pq.insert({0, 0});
-
-    while(!pq.empty()) {
-		int v = pq.begin()->second;
-		pq.erase(pq.begin());
-		dodat[v] = true;
-
-		for(edge e : graph[s.getNodes()[v]]) { // e koristi graph indekse....
-            int indeks = indeks_u_s(e,s);
-            if(indeks==-1)
-                continue;
-            //dobili smo s.vertices indeks suseda
-			int duzina = e.w;
-			if(!dodat[indeks] && duzina < s.getConnection()[indeks].w) {
-				pq.erase({s.getConnection()[indeks].w, indeks});
-				s.getConnection()[indeks] = {v, duzina};
-				pq.insert({s.getConnection()[indeks].w, indeks});
-			}
-		}
-	}
-
-    //da ne bi modifikovao algoritam tek sad menjamo podatke u pogodniji oblik
-    for(int u=1;u<s.getConnection().size();u++)
-    {
-         s.getEdges().insert(make_pair(s.getNodes()[u], s.getNodes()[s.getConnection()[u].neighbour]));
-    }
-
-}
-
 void Graph::loadGraph(const string& filepath)
 {
     ifstream file(filepath);
@@ -100,8 +58,10 @@ void Graph::loadGraph(const string& filepath)
     file >> line >> e; 
 
     graph.resize(n);
-    weights.resize(n);
-
+    weights.resize(n,0);
+    shortestPath.resize(n);
+    parents.resize(n);
+    
     for(int i=0;i<n;i++)
     {
         file >> line >> weights[i];
@@ -114,9 +74,9 @@ void Graph::loadGraph(const string& filepath)
     int u,v,w;
     for (int i = 0; i < e; ++i) {
         file >> line >> u >> v >> w;
-        graph[u].emplace_back(v, w);
-        graph[v].emplace_back(u, w);
-        if (line != "N")
+        graph[u].push_back(edge(v, w));
+        graph[v].push_back(edge(u, w));
+        if (line != "E")
         {
         throw runtime_error("loadGraph: expected 'E' but got '"+line+"'");
         }
@@ -133,17 +93,20 @@ void Graph::loadGraph(const string& filepath)
     for(int i=0;i<gr_num;i++)
     {
         file >> line >> pen;
+        if (line != "P")
+        {
+            throw runtime_error("loadGraph: expected 'P' but got '"+line+"'");
+        }
         groups[i].setPenalty(pen);
     }
 
     for(int i=0;i<gr_num;i++)
     {
         file >> line; 
-        if (line != "P")
+        if (line != "T")
         {
-            throw runtime_error("loadGraph: expected 'P' but got '"+line+"'");
+            throw runtime_error("loadGraph: expected 'T' but got '"+line+"'");
         }
-
         int v;
         while (file >> v)
         {
@@ -155,26 +118,6 @@ void Graph::loadGraph(const string& filepath)
     }
 
     file.close();
-    resizeAtributes();
-}
-
-void Graph::resizeAtributes()
-{
-    int n = graph.size();
-    shortestPath.resize(n);
-    parents.resize(n);
-}
-
-int Graph::indeks_u_s(edge e,Solution& s)
-{
-    for(int i=0;i<s.getNodes().size();i++)
-    {
-        if(s.getNodes()[i]==e.neighbour)
-        {
-            return i;
-        }
-    }
-    return -1;
 }
 
 int Graph::tezina_grane(int u,int v)

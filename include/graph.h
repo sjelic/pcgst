@@ -8,23 +8,15 @@
 #include "group.h"
 #include "solution.h"
 
-typedef struct Edge{
-    int neighbour;
-    int w;
-}edge;
-
 class Graph {
 
 public:
     void loadGraph(const string& filepath); //path: dirpath/filename
-    void resizeAtributes(); 
 
     void addEdge(int u, int v, int w);
     void removeEdge(int u, int v);
     void findShortestPath(int u); //dijkstra
-    void generateEdges(Solution& s); //prim
 
-    int indeks_u_s(edge e,Solution& s); //to do better...
     int tezina_grane(int u,int v); //to do better
     int getSize();
     vector<vector<edge>>& getGraph();

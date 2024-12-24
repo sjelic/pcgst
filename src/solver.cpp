@@ -2,6 +2,7 @@
 
 Solver::Solver(const string& filepath)
 {
+    graph = new Graph();
     graph->loadGraph(filepath);
 }
 
@@ -10,9 +11,46 @@ void Solver::findShortestPath(int u)
     graph->findShortestPath(u);
 }
 
-void Solver::generateEdges(Solution& sol)
+void Solver::generateEdges(Solution& s)
 {
-    graph->generateEdges(sol);
+    
+    int n = s.getNodes().size();
+    if(n==0)
+        return;
+    s.getConnection().resize(n);
+    for(int i=0;i<n;i++)
+        s.getConnection()[i]={-1,numeric_limits<int>::max()};
+    
+	vector<bool> dodat(n, false); 
+	set< pair<int, int> > pq;
+    
+	pq.insert({0, 0});
+
+    while(!pq.empty()) {
+		int v = pq.begin()->second;
+		pq.erase(pq.begin());
+		dodat[v] = true;
+
+		for(edge e : getNeighboursOf(s.getNodes()[v])) { // e koristi graph indekse....
+            int indeks = indeks_u_s(e,s);
+            if(indeks==-1)
+                continue;
+            //dobili smo s.vertices indeks suseda
+			int duzina = e.w;
+			if(!dodat[indeks] && duzina < s.getConnection()[indeks].w) {
+				pq.erase({s.getConnection()[indeks].w, indeks});
+				s.getConnection()[indeks] = {v, duzina};
+				pq.insert({s.getConnection()[indeks].w, indeks});
+			}
+		}
+	}
+
+    //da ne bi modifikovao algoritam tek sad menjamo podatke u pogodniji oblik
+    for(int u=1;u<s.getConnection().size();u++)
+    {
+         s.getEdges().insert(make_pair(s.getNodes()[u], s.getNodes()[s.getConnection()[u].neighbour]));
+    }
+
 }
 
 Solution Solver::basicGreedy()
@@ -356,6 +394,26 @@ vector<Group>& Solver::getGroups()
     return graph->getGroups();
 }
 
+vector<edge>& Solver::getNeighboursOf(int u)
+{
+    return graph->getGraph()[u];
+}
+
+int Solver::totalWeightOfShortestPath(int u, int v)
+{
+    return graph->totalWeightOfShortestPath(u,v);
+}
+
+set<int> Solver::groupsOnShortestPath(int u,int v)
+{
+    return graph->groupsOnShortestPath(u,v);
+}
+
+vector<int> Solver::verticesOnShortestPath(int u,int v)
+{
+    return graph->verticesOnShortestPath(u,v);
+}
+
 int Solver::tezina_grane(int u,int v)
 {
     for(edge g : graph->getGraph()[u])
@@ -364,4 +422,16 @@ int Solver::tezina_grane(int u,int v)
             return g.w;
     }
     return -1;//ne desava se
+}
+
+int Solver::indeks_u_s(edge e,Solution& s)
+{
+    for(int i=0;i<s.getNodes().size();i++)
+    {
+        if(s.getNodes()[i]==e.neighbour)
+        {
+            return i;
+        }
+    }
+    return -1;
 }

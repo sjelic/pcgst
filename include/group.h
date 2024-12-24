@@ -4,6 +4,13 @@
 
 using namespace std;
 
+struct edge{
+    int neighbour;
+    int w;
+    edge() : neighbour(0), w(0) {}
+    edge(int n, int w) : neighbour(n), w(w) {}
+};
+
 class Group {
 public:
     void addNode(int node);

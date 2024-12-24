@@ -1,16 +1,16 @@
 #include <iostream>
-#include "solution.h"
 #include "solver.h"
 #include <chrono>
 
 void runTest(string& filename)
 {
     auto start = chrono::high_resolution_clock::now();
-
+    
     Solver* s = new Solver("../data/tests/"+filename);
+    cout<<"posle ucitavanja\n";
     Solution sol = s->basicGreedy();
     s->generateEdges(sol);
-    sol.toTxt(s,filename,"../data/solutions");
+    sol.toTxt(filename,"../data/solutions");
 
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double> elapsed = end - start;

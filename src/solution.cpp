@@ -33,7 +33,7 @@ bool Solution::containsNode(int u)
     return false;
 }
 
-void Solution::toTxt(Solver* solver,const std::string& name, const std::string& dirPath)
+void Solution::toTxt(const std::string& name, const std::string& dirPath)
 {
     string filepath = dirPath + "/" + name;
     
@@ -54,12 +54,12 @@ void Solution::toTxt(Solver* solver,const std::string& name, const std::string& 
     cout << filepath << " in progress...\n";
 
     file << "SECTION Graph\n";
-    file << "Nodes " << solver->getGraphSize() << "\n";
+    file << "Nodes " << nonCoveredGroupCount.size() << "\n";
     file << "Edges " << edges.size() << "\n";
 
     for (const auto& p : edges)
     {
-        file << "E " << p.first << " " << p.second << " " << solver->tezina_grane(p.first, p.second) << "\n";
+        file << "E " << p.first << " " << p.second << " " << "w" <<"\n";//solver->tezina_grane(p.first, p.second) << "\n";
     }
 
     file << "END\n";
