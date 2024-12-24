@@ -1,6 +1,0 @@
-01_EUCLID_n=100_m=500_k=10_B=10.stp
-01_GRID_n=100_m=1800_k=10_B=10.stp
-01_RANDOM_n=10_m=30_k=3_B=10.stp
-02_EUCLID_n=200_m=2000_k=20_B=10.stp
-02_GRID_n=200_m=4000_k=20_B=10.stp
-02_RANDOM_n=200_m=1000_k=20_B=10.stp

@@ -137,7 +137,7 @@ void random_manhattan_dist(vector<pair<int,int>>& edges, vector<int>& wght, int 
 
 
 
-void generate_random_gst_instance(ofstream& inFile, string instance_name, string remark, string type, int m, int n, int k, int B)
+void generate_random_gst_instance(ofstream& inFile, string instance_name, string remark, string weight_type, int m, int n, int k, int B)
 {
 
     ListGraph g;
@@ -149,13 +149,13 @@ void generate_random_gst_instance(ofstream& inFile, string instance_name, string
     sort(edges.begin(),edges.end());
     vector<int> e_wght;
     vector<int> n_wght;
-    vector<int> g_penal;
+    // vector<int> g_penal;
     //cout<<type<<endl;
     random_weights(n,n_wght,B);
-    random_weights(k,g_penal,B);
-    if(type=="RANDOM") {random_weights(m,e_wght,B);}
-    if(type=="EUCLID") random_euclidean_dist(edges,e_wght,n,m,B);
-    if(type=="GRID") random_manhattan_dist(edges,e_wght,n,m,B);
+    // random_weights(k,g_penal,B);
+    if(weight_type=="RANDOM") {random_weights(m,e_wght,B);}
+    if(weight_type=="EUCLID") random_euclidean_dist(edges,e_wght,n,m,B);
+    if(weight_type=="GRID") random_manhattan_dist(edges,e_wght,n,m,B);
     //for(ListGraph::EdgeIt e(g); e!=INVALID; ++e) cout<<g.id(g.u(e))<<"\t"<<g.id(g.v(e))<<endl;
 
     inFile<<"0 string 33D32945  STP Steiner Tree Problem File"<<endl;
@@ -172,10 +172,10 @@ void generate_random_gst_instance(ofstream& inFile, string instance_name, string
     inFile<<"END"<<endl<<endl;
     inFile<<"SECTION Terminals"<<endl;
     inFile<<"Terminals "<<k<<endl;
-    for (int i=0; i<k; i++)
-    {
-        inFile<<"P "<<g_penal[i]<<endl;
-    }
+    // for (int i=0; i<k; i++)
+    // {
+    //     inFile<<"P "<<g_penal[i]<<endl;
+    // }
     for(int i=0; i<k; i++)
     {
         inFile<<"T";

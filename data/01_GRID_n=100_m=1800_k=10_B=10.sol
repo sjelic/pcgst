@@ -1,7 +1,0 @@
-SECTION Graph
-Nodes 100
-Edges 3
-E 57 66 2
-E 57 69 1
-E 69 98 3
-END

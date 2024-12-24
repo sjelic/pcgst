@@ -18,3 +18,4 @@ lemon/*
 .devcontainer/
 .ssh/
 .vscode-server/
+data/
